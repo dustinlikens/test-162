@@ -21,6 +21,7 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: swift # Or objective-c, or both
+          queries: +security-extended
           # If you have custom queries, specify them here or in a config file
           # queries: ./path/to/your/custom-queries
 
