@@ -1,0 +1,34 @@
+name: "CodeQL"
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday at midnight
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: macos-latest # Or a specific macOS version if needed
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: swift # Or objective-c, or both
+          # If you have custom queries, specify them here or in a config file
+          # queries: ./path/to/your/custom-queries
+
+      - name: Perform Xcode Build
+        run: |
+          # Replace 'YourProject.xcodeproj' and 'YourScheme' with your actual project and scheme
+          # Add any other build flags or commands as needed for your specific project
+          xcodebuild clean build -project test-162.xcodeproj -scheme test-162 -destination 'platform=iOS Simulator,name=iPhone 15 Pro' CODE_SIGNING_ALLOWED=NO
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
