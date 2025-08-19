@@ -102,7 +102,7 @@ jobs:
               """Creates the detailed prompt for the Gemini API."""
               return (
                   "Perform a static code analysis on the following code file. "
-                  "Identify security vulnerabilities, bugs, code smells, and performance issues. "
+                  "Identify security vulnerabilities only. "
                   "Your response MUST be a single, valid JSON object formatted according to the SARIF v2.1.0 standard. "
                   "The JSON object should represent a complete SARIF log with one 'run' containing the 'results' for this file. "
                   "Each result must include a 'message' with a 'text' field, 'locations', and a 'ruleId'. The 'ruleId' should be a short, descriptive string for the issue type (e.g., 'sql-injection', 'insecure-deserialization'). "
