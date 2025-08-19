@@ -66,11 +66,10 @@ jobs:
           
           # Add or remove file extensions you want to analyze
           FILE_EXTENSIONS_TO_ANALYZE = [
-              '.py', '.js', '.ts', '.java', '.go', '.rb', '.php', '.c', '.cpp', 
-              '.h', '.cs', '.html', '.css', '.yaml', '.yml', '.json', '.sh'
+              '.swift'
           ]
           # Files or directories to ignore to avoid analyzing dependencies or build artifacts
-          IGNORE_PATTERNS = ['.git/', 'node_modules/', '.vscode/', 'dist/', 'build/']
+          IGNORE_PATTERNS = ['.git/', '/.github/', 'node_modules/', '.vscode/', 'dist/', 'build/']
 
           # --- Main SARIF Structure ---
           # This is the template for our final SARIF report.
