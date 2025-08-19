@@ -1,0 +1,80 @@
+name: Gemini Static Code Analysis
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  gemini-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run Gemini Static Analysis
+        run: |
+          import os, json, requests
+
+          api_key = os.environ["GOOGLE_API_KEY"]
+          sarif_results = {
+              "version": "2.1.0",
+              "runs": []
+          }
+
+          for root, dirs, files in os.walk("."):
+              for fname in files:
+                  filepath = os.path.join(root, fname)
+
+                  # Skip GitHub workflow files themselves
+                  if filepath.startswith("./.git") or filepath.startswith("./.github"):
+                      continue
+
+                  with open(filepath, "r", errors="ignore") as f:
+                      content = f.read()
+
+                  prompt = f"Perform static code analysis on this file. Return results in SARIF format. File: {filepath}\n\n```{content}```"
+
+                  resp = requests.post(
+                      f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}",
+                      headers={"Content-Type": "application/json"},
+                      json={
+                          "contents": [
+                              {"parts": [{"text": prompt}]}
+                          ]
+                      }
+                  )
+                  resp.raise_for_status()
+                  gemini_output = resp.json()
+
+                  # Gemini response text (assuming SARIF returned as plain text)
+                  model_text = gemini_output["candidates"][0]["content"]["parts"][0]["text"]
+
+                  try:
+                      sarif_fragment = json.loads(model_text)
+                      sarif_results["runs"].extend(sarif_fragment.get("runs", []))
+                  except Exception:
+                      print(f"Gemini did not return valid SARIF for {filepath}")
+
+          with open("gemini-results.sarif", "w") as f:
+              json.dump(sarif_results, f)
+
+        shell: python
+
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: gemini-results.sarif
